@@ -10,14 +10,20 @@ int main (int argc, char** argv) {
 
     error_message [0] = message [0] = '\0';
 
+    
+
     char equation [1000];
     //sprintf (equation, "(2 ^ 2) + sin (3x*4 + ln(e))");
-    fgets (equation, 999, stdin);
+
+    if (argc > 1) sprintf (equation, argv[1]);
+    else fgets (equation, 999, stdin);
+
+    printf (equation);
 
     Expr* w = parse (equation, &error, message);
 
-    //if (!error) printf ("%s\n", to_string (w));
-    if (error) {
+    if (!error) printf ("%s\n", to_string (w));
+    else if (error) {
         switch (error)
                 {
                     case 1:
@@ -46,7 +52,7 @@ int main (int argc, char** argv) {
     error = 0;
     error_message [0] = message [0] = '\0';
 
-    double result = eval (w, 0, &error, message);
+    double result = eval (w, 1, &error, message);
 
     if (!error) printf ("Result: %f\n", result);
     else {

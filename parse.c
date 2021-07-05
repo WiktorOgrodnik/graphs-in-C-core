@@ -147,7 +147,6 @@ static Expr* read_value (char** inp, int* error, char* message) {
         }
 
         ex->val1.data = n / exp10;
-        return_char (c, inp);
     }
 
     if (c == 'x') { //Variable
@@ -240,7 +239,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
                     else { 
                         ex->tag = CONST_EXPR;
                         ex->val1.data = constants [i];
-                    } 
+                    }
 
                     return_char (c, inp);
                 }
@@ -260,20 +259,17 @@ static Expr* read_value (char** inp, int* error, char* message) {
             }
         }
 
-        while ((c = *(*inp)++) != ')');
-        return_char (c, inp);
-
         if (!constant && (c = read_char (inp)) != ')') {
 
             *error = 3;
             sprintf (message, ")");
-        
+
             ex->tag = ERROR_EXPR;
             ex->val1.error = 3;
 
             ex->val2.message = (char*) malloc (2 * sizeof (char));
             sprintf (ex->val2.message, ")");
-            
+
             return ex;
         }
 
