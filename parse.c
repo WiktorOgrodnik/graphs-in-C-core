@@ -61,7 +61,7 @@ char* to_string (Expr* expression) {
                     break;
         case ERROR_EXPR: sprintf (napis, "(error-expr %d %s)", expression->val1.error, expression->val2.message);
                     break;
-        default: sprintf (napis, "Coś nie tak"); break;
+        default: sprintf (napis, "Something went wrog!"); break;
     }
 
     return napis;
@@ -119,10 +119,11 @@ static int read_char (char** inp) {
 }
 
 static Expr* read_value (char** inp, int* error, char* message) {
-
+    
     int c;
     double n = 0.0, exp10 = 1.0;
     bool isNum = false;
+    bool isFunction = false;
     Expr* ex;
 
     if ((ex = (Expr*) malloc (sizeof (Expr))) == NULL)
@@ -168,14 +169,14 @@ static Expr* read_value (char** inp, int* error, char* message) {
             ex->val2.left = ex1;
             ex->val3.right = ex2;
         }
+        else ex->tag = VAR_EXPR;
 
-        else {
-            ex->tag = VAR_EXPR;
-        } 
+        c = *(*inp)++;
         c = *(*inp)++;
     }
+
     else if (isalpha (c)) { // Function module
-    
+
         int it = 0;
         char function [10];
 
@@ -193,8 +194,9 @@ static Expr* read_value (char** inp, int* error, char* message) {
         for (int i = 0; i < NUMBER_OF_FUNCTIONS && !found; i++) { //Find a specific function
 
             if (strcmp (function, nameOfFunctions [i]) == 0) {
-
+                
                 found = true;
+                isFunction = true;
 
                 if (isNum) {
 
@@ -248,16 +250,22 @@ static Expr* read_value (char** inp, int* error, char* message) {
             if (!found) {
                 
                 *error = 1;
-                sprintf (message, "%s", function);
+                sprintf (message, function);
 
                 ex->tag = ERROR_EXPR;
                 ex->val1.error = 1;
 
                 ex->val2.message = (char*) malloc ((strlen (function) + 1) * sizeof (char));
-                sprintf (ex->val2.message, "%s", function);
+                sprintf (ex->val2.message, function);
                 return ex;
             }
         }
+
+        if (isFunction) {
+            while ((c = *(*inp)++) != ')');
+        }
+
+        return_char (c, inp);
 
         if (!constant && (c = read_char (inp)) != ')') {
 
@@ -283,103 +291,100 @@ static Expr* read_value (char** inp, int* error, char* message) {
 static Expr* expression (char** inp, int* error, char* message) { //Expression consist of ingredients and signs '+' and '-'
 
     int c;
-    bool onlyone = true;
-    Expr *res, *l, *r;
-
-    if (((res = (Expr*) malloc (sizeof (Expr))) == NULL) || ((l = (Expr*) malloc (sizeof (Expr))) == NULL) || ((r = (Expr*) malloc (sizeof (Expr))) == NULL))
-        return runtime_error (error, message);
+    Expr *res;
 
     if ((c = read_char (inp)) != '-' && c != '+') return_char (c, inp); //detect sign of ingredient
 
-    l = ingredient (inp, error, message); //find next ingredient
+    res = ingredient (inp, error, message); //find next ingredient
 
     if (c == '-') { //if it was negative ingredient multiply by -1 
         
-        Expr *ex1, *ex2;
+        Expr* ex1;
+        Expr* ex2 = res;
 
-        if (((ex1 = (Expr*) malloc (sizeof (Expr))) == NULL) || ((ex2 = (Expr*) malloc (sizeof (Expr))) == NULL) || (l = (Expr*) malloc (sizeof (Expr))) == NULL)
+        if ((ex1 = (Expr*) malloc (sizeof (Expr))) == NULL || (res = (Expr*) malloc (sizeof (Expr))) == NULL)
             return runtime_error (error, message);
 
         ex1->tag = CONST_EXPR;
         ex1->val1.data = -1;
 
-        ex2 = l;
-
-        l->tag = BINOP_EXPR;
-        l->val1.binop = mult;
-        l->val2.left = ex1;
-        l->val3.right = ex2;
+        res->tag = BINOP_EXPR;
+        res->val1.binop = mult;
+        res->val2.left = ex1;
+        res->val3.right = ex2;
     }     
 
     while ((c = read_char (inp)) == '+' || c == '-') { //if the next character is '+' or '-' calculate the expression
-        onlyone = false;
-        r = ingredient (inp, error, message); //find next ingredient
+    
+        Expr* ex1 = res;
+        Expr* ex2 = ingredient (inp, error, message); //find next ingredient
+
+        if ((res = (Expr*) malloc (sizeof (Expr))) == NULL)
+            return runtime_error (error, message);
 
         res->tag = BINOP_EXPR;
-        res->val2.left = l;
-        res->val3.right = r;
+        res->val2.left = ex1;
+        res->val3.right = ex2;
 
         if (c == '+') res->val1.binop = add;
         else res->val1.binop = sub;
     }
 
     return_char (c, inp); //return last character (used for check if next is '+' or '-') 
-    if (onlyone) return l;       
     return res;
 }
 
 static Expr* ingredient (char** inp, int* error, char* message) { //Expression consist of ingredients and signs '+' and '-'
 
     int c;
-    bool onlyone = true;
-    Expr *res, *l, *r;
+    Expr *res;
 
-    if (((res = (Expr*) malloc (sizeof (Expr))) == NULL) || ((l = (Expr*) malloc (sizeof (Expr))) == NULL) || ((r = (Expr*) malloc (sizeof (Expr))) == NULL))
-        return runtime_error (error, message);
-
-    l = factor (inp, error, message); //find next ingredient
+    res = factor (inp, error, message); //find next ingredient
 
     while ((c = read_char (inp)) == '*' || c == '/') { //if the next character is '*' or '/' calculate the expression
-        onlyone = false;
-        r = factor (inp, error, message); //find next ingredient
+
+        Expr *ex1, *ex2;
+
+        ex1 = res;
+        ex2 = factor (inp, error, message); //find next ingredient
+
+        if (((res = (Expr*) malloc (sizeof (Expr))) == NULL))
+            return runtime_error (error, message);
 
         res->tag = BINOP_EXPR;
-        res->val2.left = l;
-        res->val3.right = r;
+        res->val2.left = ex1;
+        res->val3.right = ex2;
 
         if (c == '*') res->val1.binop = mult;
         else res->val1.binop = mdiv;
     }
 
     return_char (c, inp); //return last character (used for check if next is '*' or '/')
-    if (onlyone) return l;  
     return res;
 }
 
 static Expr* factor (char** inp, int* error, char* message) { //factors consist of exponents and sign '^'
 
     int c;
-    bool onlyone = true;
-    Expr *res, *l, *r;
+    Expr *res;
 
-    if (((res = (Expr*) malloc (sizeof (Expr))) == NULL) || ((l = (Expr*) malloc (sizeof (Expr))) == NULL) || ((r = (Expr*) malloc (sizeof (Expr))) == NULL))
-        return runtime_error (error, message);
-
-    l = exponent (inp, error, message); //find next exponent
+    res = exponent (inp, error, message); //find next exponent
 
     while ((c = read_char (inp)) == '^') { //if the next character is '^' calculate the factor
-        onlyone = false;
-        r = factor (inp, error, message); //find next factor (becouse the stange order of actions with ^ sign)
+
+        Expr* ex1 = res;
+        Expr* ex2 = factor (inp, error, message); //find next factor (becouse the stange order of actions with ^ sign)
+
+        if (((res = (Expr*) malloc (sizeof (Expr))) == NULL))
+            return runtime_error (error, message);
 
         res->tag = BINOP_EXPR;
         res->val1.binop = pow;
-        res->val2.left = l;
-        res->val3.right = r;
+        res->val2.left = ex1;
+        res->val3.right = ex2;
     }
 
-    return_char (c, inp); //return last character (used for check if next is '^')
-
-    if (onlyone) return l;       
+    return_char (c, inp); //return last character (used for check if next is '^')     
     return res;
 }
 

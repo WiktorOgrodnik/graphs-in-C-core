@@ -18,7 +18,7 @@ int main (int argc, char** argv) {
     if (argc > 1) sprintf (equation, argv[1]);
     else fgets (equation, 999, stdin);
 
-    printf (equation);
+    //printf (equation);
 
     Expr* w = parse (equation, &error, message);
 
