@@ -20,6 +20,7 @@
 double fractionalPart (double a);
 double cot (double a);
 
+//Custom binary operators
 double add (double a, double b);
 double sub (double a, double b);
 double mult (double a, double b);
@@ -28,9 +29,11 @@ double mdiv (double a, double b);
 #define NUMBER_OF_FUNCTIONS 26
 #define NUMBER_OF_CONSTANTS 3
 
+// Array of functions
 extern char* nameOfFunctions[NUMBER_OF_FUNCTIONS];
 extern double (*functions[NUMBER_OF_FUNCTIONS])(double x);
 
+// Array of constatns
 extern char* nameOfConstants[NUMBER_OF_CONSTANTS];
 extern double constants[NUMBER_OF_CONSTANTS];
 
@@ -43,6 +46,7 @@ enum ExprTag {
     ERROR_EXPR
 };
 
+// Expression node structure
 typedef struct ExprS {
 
     enum ExprTag tag;
@@ -68,7 +72,7 @@ typedef struct ExprS {
 //Parse string to mathematical expression
 Expr* parse (const char* eqBegin, int* error, char* message); 
 
-//Print previously parsed expression
+//Print parsed expression
 char* to_string (Expr* expression);
 
 #endif
