@@ -133,7 +133,7 @@ static int read_char (char** inp) {
 
 static Expr* read_value (char** inp, int* error, char* message) {
     
-    int c;
+    int c = 0;
     double n = 0.0, exp10 = 1.0;
     bool isNum = false;
     bool isFunction = false;
@@ -165,7 +165,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
         ex->val1.data = n / exp10;
     }
 
-    if (c == 'x') { //Variable
+    if (**inp == 'x') { //Variable
 
         if (isNum) {
             
@@ -191,7 +191,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
         c = *(*inp)++;
     }
 
-    else if (isalpha (c)) { // Function module
+    else if (isalpha (**inp)) { // Function module
 
         int it = 0;
         char function [10];
@@ -256,7 +256,7 @@ static Expr* read_value (char** inp, int* error, char* message) {
                     if (isNum) ex->val1.data = (n / exp10) * constants [i]; // For optimization, create multiplication of constant and number in one node
                     else ex->val1.data = constants [i];
                 
-                    return_char (c, inp);
+                    //return_char (c, inp);
                 }
             }
 

@@ -33,7 +33,7 @@ int main (int argc, char** argv) {
         }
         else if (opt == 'p') pflag = true;
         else if (opt == 'h') {
-            printf ("Usage: mathEval [options] [target] ...\n");
+            printf ("Usage: math [options] [target] ...\n");
             printf ("Options:\n");
             printf ("-e STRING           Load equation.\n");
             printf ("-g                  Graph mode.\n");

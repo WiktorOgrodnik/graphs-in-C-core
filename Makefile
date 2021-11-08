@@ -1,9 +1,9 @@
 CC = gcc
 SRC_DIR = .
 INC_DIR = .
-CFLAGS = -std=gnu11 -Wall -Wextra -Werror -Wpedantic -Wno-unused-parameter
+CFLAGS = -std=gnu11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -O2
 LIBS = -lm
-NAME = mathEval
+NAME = math
 
 OBJS = main.o parse.o eval.o
 
