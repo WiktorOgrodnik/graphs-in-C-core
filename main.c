@@ -23,39 +23,43 @@ int main (int argc, char** argv) {
         if (opt == 'g') gflag = true;
         else if (opt == 'e') {
             eflag = true;
-            sprintf (equation, optarg);
+            sprintf(equation, "%s", optarg);
         }
-        else if (opt == 'm') measurements = atoi (optarg);
-        else if (opt == 'i') interval = atoi (optarg);
+        else if (opt == 'm') measurements = atoi(optarg);
+        else if (opt == 'i') interval = atoi(optarg);
         else if (opt == 'f') {
             fflag = true;
-            sprintf (fileName, optarg);
+            sprintf(fileName, "%s", optarg);
         }
         else if (opt == 'p') pflag = true;
         else if (opt == 'h') {
-            printf ("Usage: math [options] [target] ...\n");
-            printf ("Options:\n");
-            printf ("-e STRING           Load equation.\n");
-            printf ("-g                  Graph mode.\n");
-            printf ("-m NUMBER           Number of measurements.\n");
-            printf ("-i NUMBER           Interval (from -n to n).\n");
-            printf ("-f STRING           File to write result.\n");
-            printf ("-p                  Print parsed expression.\n");
-            printf ("-h                  Help menu.\n");
+            printf("Usage: math [options] [target] ...\n");
+            printf("Options:\n");
+            printf("-e STRING           Load equation.\n");
+            printf("-g                  Graph mode.\n");
+            printf("-m NUMBER           Number of measurements.\n");
+            printf("-i NUMBER           Interval (from -n to n).\n");
+            printf("-f STRING           File to write result.\n");
+            printf("-p                  Print parsed expression.\n");
+            printf("-h                  Help menu.\n");
 
             return 0;
         }
     }
 
-    if (!eflag) fgets (equation, 999, stdin);
+    if (!eflag) {
+        if (!fgets(equation, 999, stdin)){
+            printf("RUNTIME ERROR: stdin returned null");
+        }
+    }
 
     if (fflag) file = fopen(fileName, "w");
     
-    Expr* w = parse (equation, &error, message);
+    Expr* w = parse(equation, &error, message);
 
     if (!error && pflag) {
-        if (fflag) fprintf (file, "%s\n", to_string (w));
-        else printf ("%s\n", to_string (w));
+        if (fflag) fprintf(file, "%s\n", to_string (w));
+        else printf("%s\n", to_string (w));
 
         return 0;
     }
@@ -63,25 +67,25 @@ int main (int argc, char** argv) {
         switch (error)
                 {
                     case 1:
-                        sprintf (error_message, "PARSE ERROR: Can not find: %s", message);
+                        sprintf(error_message, "PARSE ERROR: Can not find: %s", message);
                     break;
                     case 2:
-                        sprintf (error_message, "PARSE ERROR: expected number or '(', or '|', or '{', or '['");
+                        sprintf(error_message, "PARSE ERROR: expected number or '(', or '|', or '{', or '['");
                     break;
                     case 3:
-                        sprintf (error_message, "PARSE ERROR: Incorrect parenthesis, expected: '%s'", message);
+                        sprintf(error_message, "PARSE ERROR: Incorrect parenthesis, expected: '%s'", message);
                     break;
                     case 4:
-                        sprintf (error_message, "RUNTIME ERROR: Critical error, can not allocate memory!");
+                        sprintf(error_message, "RUNTIME ERROR: Critical error, can not allocate memory!");
                     break;
                     case 5: 
-                        sprintf (error_message, "PARSE ERROR: Empty string!");
+                        sprintf(error_message, "PARSE ERROR: Empty string!");
                     break;
                     default:
-                        sprintf (error_message, "PARSE ERROR: Unknown error!");
+                        sprintf(error_message, "PARSE ERROR: Unknown error!");
                     break;
                 }
-        printf ("%s\n", error_message);
+        printf("%s\n", error_message);
         return EXIT_FAILURE;  
     }
 
@@ -90,32 +94,32 @@ int main (int argc, char** argv) {
 
     if (!gflag) {
 
-        double result = eval (w, 1, &error, message);
+        double result = eval(w, 1, &error, message);
 
         if (!error) 
-            if (fflag) fprintf (file, "Result: %f\n", result);
-            else printf ("Result: %f\n", result);
+            if (fflag) fprintf(file, "Result: %f\n", result);
+            else printf("Result: %f\n", result);
         else {
             switch (error)
                     {
                         case 1:
-                            sprintf (error_message, "EVAL ERROR: Invalid equation node! Node id: %s", message);
+                            sprintf(error_message, "EVAL ERROR: Invalid equation node! Node id: %s", message);
                         break;
                         case 2:
-                            sprintf (error_message, "EVAL ERROR: Not a number!");
+                            sprintf(error_message, "EVAL ERROR: Not a number!");
                         break;
                         case 3:
-                            sprintf (error_message, "EVAL ERROR: Can not divide by zero!");
+                            sprintf(error_message, "EVAL ERROR: Can not divide by zero!");
                         break;
                         case 4:
-                            sprintf (error_message, "EVAL ERROR: Can not raise 0 to the 0 power!");
+                            sprintf(error_message, "EVAL ERROR: Can not raise 0 to the 0 power!");
                         break;
                         default:
-                            sprintf (error_message, "EVAL ERROR: Unknown error!");
+                            sprintf(error_message, "EVAL ERROR: Unknown error!");
                         break;
                     }
 
-            printf ("%s\n", error_message);
+            printf("%s\n", error_message);
             return EXIT_FAILURE;
         }
     } else {
@@ -124,22 +128,22 @@ int main (int argc, char** argv) {
         double delta = (2.0 * (double) interval) / (double) measurements;
         
         for (int i = 0; i < measurements; i++) {
-            double res = eval (w, l, &error, message);
+            double res = eval(w, l, &error, message);
 
             if (!error) 
-                if (fflag) fprintf (file, "%d %f %f\n", i, l, res);
-                else printf ("%d %f %f\n", i, l, res);
+                if (fflag) fprintf(file, "%d %f %f\n", i, l, res);
+                else printf("%d %f %f\n", i, l, res);
             else {
                 error = 0;
-                if (fflag) fprintf (file, "%d %f\n", i, l);
-                else printf ("%d %f\n", i, l);
+                if (fflag) fprintf(file, "%d %f\n", i, l);
+                else printf("%d %f\n", i, l);
             }
 
             l += delta;
         }
     }
 
-    if (fflag) fclose (file);
+    if (fflag) fclose(file);
 
     return 0;
 }
