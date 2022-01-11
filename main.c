@@ -42,7 +42,9 @@ int main (int argc, char** argv) {
             printf("-f STRING           File to write result.\n");
             printf("-p                  Print parsed expression.\n");
             printf("-h                  Help menu.\n");
-
+            printf("------------------------\n");
+            printf("version: 0.20\n");
+            printf("gcc version: %d.%d.%d\n", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
             return 0;
         }
     }
