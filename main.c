@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <getopt.h>
 
 #include "eval.h"
 
@@ -19,17 +20,17 @@ int main (int argc, char** argv) {
 
     FILE* file;
 
-    while ((opt = getopt (argc, argv, "e:gm:i:f:hp")) != -1) {
+    while ((opt = getopt(argc, argv, "e:gm:i:f:hp")) != -1) {
         if (opt == 'g') gflag = true;
         else if (opt == 'e') {
             eflag = true;
-            sprintf(equation, "%s", optarg);
+            sprintf(equation, "%s\n", optarg);
         }
         else if (opt == 'm') measurements = atoi(optarg);
         else if (opt == 'i') interval = atoi(optarg);
         else if (opt == 'f') {
             fflag = true;
-            sprintf(fileName, "%s", optarg);
+            sprintf(fileName, "%s\n", optarg);
         }
         else if (opt == 'p') pflag = true;
         else if (opt == 'h') {
