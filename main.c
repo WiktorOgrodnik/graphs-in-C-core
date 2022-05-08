@@ -30,7 +30,7 @@ int main (int argc, char** argv) {
         else if (opt == 'i') interval = atoi(optarg);
         else if (opt == 'f') {
             fflag = true;
-            sprintf(fileName, "%s\n", optarg);
+            sprintf(fileName, "%s", optarg);
         }
         else if (opt == 'p') pflag = true;
         else if (opt == 'h') {
