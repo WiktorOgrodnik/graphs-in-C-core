@@ -1,1 +1,0 @@
-(binop-expr add (binop-expr pow (binop-expr mult (const-expr 2.000000) (const-expr 4.000000)) (const-expr 5.000000)) (fun-expr sin (binop-expr add (const-expr 4.000000) (fun-expr log (const-expr 2.718282)))))

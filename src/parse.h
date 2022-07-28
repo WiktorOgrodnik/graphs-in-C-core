@@ -1,7 +1,5 @@
-#ifndef PARSE_H
-#define PARSE_H
-
-#define LINUX
+#ifndef PARSE_CORE_H
+#define PARSE_CORE_H
 
 #ifdef WINDOWS
 #define _USE_MATH_DEFINES
@@ -17,14 +15,14 @@
 #include <math.h>
 
 //Custom math functions
-double fractionalPart (double a);
-double cot (double a);
+double fractionalPart(double a);
+double cot(double a);
 
 //Custom binary operators
-double add (double a, double b);
-double sub (double a, double b);
-double mult (double a, double b);
-double mdiv (double a, double b);
+double add(double a, double b);
+double sub(double a, double b);
+double mult(double a, double b);
+double mdiv(double a, double b);
 
 #define NUMBER_OF_FUNCTIONS 26
 #define NUMBER_OF_CONSTANTS 3
@@ -70,9 +68,9 @@ typedef struct ExprS {
 } Expr;
 
 //Parse string to mathematical expression
-Expr* parse (const char* eqBegin, int* error, char* message); 
+Expr* parse(const char* eqBegin, int* error, char* message); 
 
 //Print parsed expression
-char* to_string (Expr* expression);
+char* to_string(Expr* expression);
 
 #endif

@@ -1,17 +1,24 @@
 CC = gcc
-SRC_DIR = .
+SRC_DIR = src
+OBJ_DIR = obj
 INC_DIR = .
-CFLAGS = -std=gnu11 -Wall -Wextra -Wpedantic -Wno-unused-parameter -O2
+CFLAGS = -std=gnu18 -Wall -Wextra -Wpedantic -O3
 LIBS = -lm
 NAME = math
 
-OBJS = main.o parse.o eval.o
+OBJS = $(addprefix $(OBJ_DIR)/, main.o parse.o eval.o)
 
-all: $(OBJS)
+all: pre $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
 
-%.o: $(SRC_DIR)/%.c
-	@$(CC) $(CFLAGS) -c -I$(INC_DIR) $< -o $@ $(GTK)
+pre:
+	@if [ ! -d "$(OBJ_DIR)" ]; then mkdir $(OBJ_DIR); fi;
+
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	@$(CC) $(CFLAGS) -c -I$(INC_DIR) -DLINUX $< -o $@ $(GTK)
 
 clean:
-	@rm -f $(NAME) $(OBJS)
+	@if [ -d "$(OBJ_DIR)" ]; then rm -r -f $(OBJ_DIR); fi;
+
+distclean: clean
+	@rm -f $(NAME)
