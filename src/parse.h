@@ -1,7 +1,7 @@
 #ifndef PARSE_CORE_H
 #define PARSE_CORE_H
 
-#ifdef WINDOWS
+#ifndef WINDOWS
 #define _USE_MATH_DEFINES
 #else
 #define _GNU_SOURCE

@@ -1,5 +1,6 @@
 #include "parse.h"
 #define NUMBER 0
+#define MAX_EQUATION_LEN 4096
 
 /* Definitions */
 
@@ -30,6 +31,7 @@ double constants[NUMBER_OF_CONSTANTS] = {M_E, M_PI, 1.618033988749895};
 // Prints parse auxilary functions
 static const char* fun_to_string(double (*fun)(double));
 static const char* binop_to_string(double (*fun)(double, double));
+static void* error_and_return(int code, const char* message, int* error, char* error_message);
 
 /* Body */
 
@@ -52,6 +54,13 @@ static const char* binop_to_string(double (*fun)(double, double)) {
     if (fun == mdiv) return "div";
 
     return "null";
+}
+
+// Return NULL and automatically assigns code and message
+static void* error_and_return(int code, const char* message, int* error, char* error_message) {
+    if (error_message) strcpy(error_message, message);
+    if (error) *error = code;
+    return NULL;
 }
 
 // Prints parsed expression (in lisp style)
@@ -78,20 +87,18 @@ char* to_string (Expr* expression) {
 
 // Generates runtime error message (not enough memory)
 static Expr* runtime_error(int* error, char* message) {
-    *error = 4;
-    return NULL;
+    return error_and_return(4, "", error, message);
 }
-
 
 // Parses mathematical equation to Expression 
 Expr* parse(const char* eqBegin, int* error, char* message) {
 
-    int eqLength = strlen (eqBegin);
-    char begin[eqLength];
+    size_t len = strlen(eqBegin);
 
-    // Copy string to other array
-    for (int i = 0; i <= eqLength; i++)
-        begin[i] = *(eqBegin + i);
+    if (len > MAX_EQUATION_LEN) return error_and_return(7, "", error, NULL);
+
+    char* begin = malloc(len + 1);
+    strcpy(begin, eqBegin);
 
     int c;
     Expr* result = NULL;
@@ -130,6 +137,16 @@ static int read_char(char** inp) {
     return c == 0 ? EOF : c; //If 0 return EOF
 }
 
+static int read_char_2(char** inp) {
+    int c;
+    
+    //EOF when '\0'
+    if (**inp == '\0') return EOF;
+    //Skip all spaces
+    while ((c = *(*inp)++) != '\0' && (isspace(c) || c < 32));
+    return c == 0 ? EOF : c; //If 0 return EOF
+}
+
 static Expr* read_value(char** inp, int* error, char* message) {
     
     int c = 0;
@@ -142,7 +159,7 @@ static Expr* read_value(char** inp, int* error, char* message) {
     if ((ex = malloc(sizeof(Expr))) == NULL)
         return runtime_error(error, message);
 
-    if (isdigit(**inp)) {
+    if (isdigit((c = **inp))) {
 
         ex->tag = CONST_EXPR;
 
@@ -164,7 +181,7 @@ static Expr* read_value(char** inp, int* error, char* message) {
         ex->val1.data = n / exp10;
     }
 
-    if (**inp == 'x') { //Variable
+    if (c == 'x') { //Variable
 
         if (isNum) {
             
@@ -190,12 +207,14 @@ static Expr* read_value(char** inp, int* error, char* message) {
         c = *(*inp)++;
     }
 
-    else if (isalpha (**inp)) { // Function module
+    else if (isalpha(c)) { // Function module
 
         int it = 0;
         char function[10];
 
-        while ((c = *(*inp)++) != '\0' && c != '(' && !isspace(c) && (isalpha(c) || isdigit(c))) //Read function or constant name
+        if (isNum) return_char(c, inp);
+        
+        while ((c = read_char_2(inp)) != EOF && c != '(' && isalnum(c)) //Read function or constant name
             function[it++] = (char)c;
 
         function[it] = '\0'; // Set null character to the end of the string
@@ -218,7 +237,7 @@ static Expr* read_value(char** inp, int* error, char* message) {
                     Expr *ex1, *ex2;
 
                     // If previously there was a number, create a multiplication node
-                    if ((ex1 = malloc (sizeof(Expr))) == NULL || (ex2 = malloc (sizeof(Expr))) == NULL)
+                    if ((ex1 = malloc(sizeof(Expr))) == NULL || (ex2 = malloc(sizeof(Expr))) == NULL)
                         return runtime_error(error, message);
 
                     ex1->tag = CONST_EXPR;
@@ -297,7 +316,7 @@ static Expr* read_value(char** inp, int* error, char* message) {
         c = NUMBER;
     }
 
-    return_char(c == 0 ? EOF : c, inp);        
+    return_char(c == 0 ? EOF : c, inp);
     return ex;
 }
 
@@ -356,7 +375,7 @@ static Expr* ingredient(char** inp, int* error, char* message) { //Expression co
 
     res = factor(inp, error, message); //find next ingredient
 
-    while ((c = read_char (inp)) == '*' || c == '/') { //if the next character is '*' or '/' calculate the expression
+    while ((c = read_char(inp)) == '*' || c == '/') { //if the next character is '*' or '/' calculate the expression
 
         Expr *ex1, *ex2;
 
@@ -413,13 +432,19 @@ static Expr* exponent(char** inp, int* error, char* message) { //exponent can be
     if ((res = malloc(sizeof(Expr))) == NULL)
             return runtime_error(error, message);
 
-    if ((c = read_char(inp)) == NUMBER) return read_value(inp, error, message); // if the next character is number, function, constant or variable read value
+    if ((c = read_char(inp)) == NUMBER) {
+
+        res = read_value(inp, error, message); // if the next character is number, function, constant or variable read value
+        
+        return res;
+    }
     else if (c == '(') { // normal parenthesis, calculate the value in parentheses
+
         res = expression(inp, error, message);
 
         if ((c = read_char(inp)) == ')') return res;
         else {
-
+            
             *error = 3;
             sprintf(message, ")");
 

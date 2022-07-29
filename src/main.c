@@ -88,7 +88,7 @@ int main (int argc, char** argv) {
                         sprintf(error_message, "PARSE ERROR: Unknown error!");
                     break;
                 }
-        printf("%s\n", error_message);
+        fprintf(stderr, "%s\n", error_message);
         return EXIT_FAILURE;  
     }
 

@@ -11,6 +11,9 @@ OBJS = $(addprefix $(OBJ_DIR)/, main.o parse.o eval.o)
 all: pre $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
 
+test: all
+	python tests/tests.py
+
 pre:
 	@if [ ! -d "$(OBJ_DIR)" ]; then mkdir $(OBJ_DIR); fi;
 
