@@ -1,6 +1,5 @@
 import os
 import subprocess
-import sys
 
 cases = [
 	("2.5", "2.500000"),
@@ -20,14 +19,14 @@ cases = [
 	("e", "2.718282"),
 ]
 
-executable = "./math.exe"
+executable = "./math.exe" if os.name == "nt" else "./math"
 
 if not os.access(executable, os.R_OK):
-	print("./math.exe does not exist!")
+	print("{} does not exist!".format(executable))
 	quit()
 
 if not os.access(executable, os.X_OK):
-	print("math.exe does not exists!")
+	print("{} is not an executable!".format(executable))
 	quit()
 
 for it, (test_case, expected_output) in enumerate(cases):
@@ -38,11 +37,9 @@ for it, (test_case, expected_output) in enumerate(cases):
 	if p.returncode != 0:
 		print("⛔ Program returned non zero exit code!")
 		continue
-	
+
 	test_output = p.stdout.strip()
 	if test_output == 'Result: ' + expected_output:
 		print("✅ Success!")
 	else:
 		print("⛔ Expected {}, returned {}".format(expected_output, test_output))
-  
-

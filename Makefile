@@ -12,7 +12,7 @@ all: pre $(OBJS)
 	@$(CC) $(CFLAGS) $(OBJS) -o $(NAME) $(LIBS)
 
 test: all
-	python tests/tests.py
+	python3 tests/tests.py
 
 pre:
 	@if [ ! -d "$(OBJ_DIR)" ]; then mkdir $(OBJ_DIR); fi;

@@ -44,7 +44,7 @@ int main (int argc, char** argv) {
             printf("-p                  Print parsed expression.\n");
             printf("-h                  Help menu.\n");
             printf("------------------------\n");
-            printf("version: 0.20\n");
+            printf("version: 0.21\n");
             printf("gcc version: %d.%d.%d\n", __GNUC__, __GNUC_MINOR__, __GNUC_PATCHLEVEL__);
             return 0;
         }
